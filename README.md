@@ -6,3 +6,5 @@ Adv. Playground : Gallery - Customizable Unity Template
     [![Made with Unity](https://img.shields.io/badge/Made%20with-Unity-57b9d3.svg?style=flat-square&logo=unity)](https://unity3d.com)
     [![Join Discord](https://img.shields.io/discord/862277439023874059?logo=discord)](https://discord.gg/w92sXkNmBR)
   
+  
+Initialised Metaverse Gallery Template at #HackFS22 @EthGlobal
