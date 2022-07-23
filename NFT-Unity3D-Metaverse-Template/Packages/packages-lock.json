@@ -1,5 +1,14 @@
 {
   "dependencies": {
+    "com.nftport.nftport": {
+      "version": "https://github.com/nftport/nftport-unity.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.nuget.newtonsoft-json": "3.0.2"
+      },
+      "hash": "0e576abf6a6976342aa08c6e6d37c2f7f2f37b21"
+    },
     "com.unity.collab-proxy": {
       "version": "1.15.15",
       "depth": 0,
@@ -58,6 +67,13 @@
     "com.unity.ide.vscode": {
       "version": "1.2.5",
       "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.nuget.newtonsoft-json": {
+      "version": "3.0.2",
+      "depth": 1,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
