@@ -18,7 +18,7 @@ public class Gallery : MonoBehaviour
     public GalleryNFT_frame[] GalleryNftFrames;
     public int framesFilled = 0;
     private bool allFramesFilled = false;
-    private void Awake()
+    private void Start()
     {
         Debug.Log("3D NFT Gallery | _sz_ | Worldsz");
         Debug.Log("Poweredby NFTPort, Made With Unity, Supported by Ready Player Me");
@@ -107,6 +107,7 @@ public class Gallery : MonoBehaviour
     {
         Debug.Log("Using NFTPort : NFTs of Contract on " + _galleryController.GetChainFromDropDownSelectContract());
         
+        //From https://docs.nftport.xyz/docs/nftport/ZG9jOjUzNjI2MzQ0-nf-ts-of-a-contract-collection
         _nfTsOfAContract
             .SetChain(_galleryController.GetChainFromDropDownSelectContract())
             .SetContractAddress(_galleryController.CollectionAddressInput.text)
@@ -121,6 +122,7 @@ public class Gallery : MonoBehaviour
     {
         Debug.Log("Using NFTPort : NFTs of Account on " + _galleryController.GetChainFromDropDownSelectAccount() + " .Filter " + _galleryController.FilterAccountFromContract.text);
         
+        // From https://docs.nftport.xyz/docs/nftport/ZG9jOjUyMzI4NTkz-nf-ts-owned-by-an-account
         _nfTOwnedByAnAccount
             .SetChain(_galleryController.GetChainFromDropDownSelectAccount())
             .SetAddress(Port.ConnectedPlayerAddress)
@@ -155,6 +157,7 @@ public class Gallery : MonoBehaviour
             if ((nft.file_url != null || nft.cached_file_url != null) 
                 && (nft.name !=null || nft.metadata.name !=null || nft.token_id != null))//&&)
             {
+                //via https://docs.nftport.xyz/docs/nftport/ZG9jOjU2NjAzOTE0-asset-downloader
                 //content-type to download
                 var temp = AssetDownloader.DetemineURLContentType
                     .Initialize()
