@@ -17,7 +17,7 @@ Gallery is fully composable and is ready to use. Gallery Frames can be reduced o
 - NFT of Account in Particular collection
 - NFT Texture and all Metadata + owner/contract info
 - GIF support
-- 3D Asset of NFTs support/download + show.
+- 3D Assets of NFTs support
 
 
 ------
