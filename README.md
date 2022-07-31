@@ -27,6 +27,7 @@ Gallery is fully composable and is ready to use. Gallery Frames can be reduced o
 ![ezgif-1-c6950c812e](https://user-images.githubusercontent.com/43649755/182004151-5f0e7c23-94c9-4e7d-b8f1-fc3c2ab19769.gif)
 ![gallery 1 sz 4](https://user-images.githubusercontent.com/43649755/182004165-66170846-fa0b-4db1-9f23-5cc5823f7cb8.gif)
 ![projects_m00qr_images_ezgif-3-96144ac59f](https://user-images.githubusercontent.com/43649755/182004673-3e027505-587f-4f47-a514-2ae60fe6344b.gif)
+![Screenshot 2022-06-25 034312](https://user-images.githubusercontent.com/43649755/176864004-9599128b-16cd-48b1-b4ae-a8d654453532.jpg)
 
 </h1>
 
