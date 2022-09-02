@@ -19,6 +19,7 @@ Gallery is fully composable and is ready to use. Gallery Frames can be reduced o
 - GIF support
 - 3D Assets of NFTs support
 
+- [Initialised Metaverse Gallery Template at #HackFS22 @EthGlobal - IPFS/Filecoin Social Good Warrior Winner , Metaverse/Gaming Category](https://ethglobal.com/showcase/playground-unity3d-nft-gallery-template-m00qr)
 
 ------
 <h1 align="center">
@@ -30,7 +31,5 @@ Gallery is fully composable and is ready to use. Gallery Frames can be reduced o
 ![Screenshot 2022-06-25 034312](https://user-images.githubusercontent.com/43649755/176864004-9599128b-16cd-48b1-b4ae-a8d654453532.jpg)
 
 </h1>
-
-- [Initialised Metaverse Gallery Template at #HackFS22 @EthGlobal - IPFS/Filecoin Social Good Warrior Winner , Metaverse/Gaming Category](https://ethglobal.com/showcase/playground-unity3d-nft-gallery-template-m00qr)
 
 ------
