@@ -14,10 +14,14 @@ public class Gallery : MonoBehaviour
     [SerializeField] private GalleryReUsableAssets _galleryReUsableAssets;
     [SerializeField] NFTs_OwnedByAnAccount _nfTOwnedByAnAccount;
     [SerializeField] NFTs_OfAContract _nfTsOfAContract;
+    public float WaitBeforeContinuation = 0.01f;
+    public int StartNextLoopWhenThisNumberofFramesifStillDownloading = 8;
     
-    public GalleryNFT_frame[] GalleryNftFrames;
-    public int framesFilled = 0;
+    [Space]
+    [ReadOnly] public GalleryNFT_frame[] GalleryNftFrames;
+    [ReadOnly] public int framesFilled = 0;
     private bool allFramesFilled = false;
+
     private void Start()
     {
         Debug.Log("3D NFT Gallery | _sz_ | Worldsz");
@@ -46,7 +50,9 @@ public class Gallery : MonoBehaviour
         allFramesFilled = false;
         NftsWithGif.Clear();
         GifLoopRunning = false;
-
+        ContinuationContractModePageNumb = 0;
+        NftsCheckedInCollection = 0;
+        firstContinuationLoop = true;
 
         var UniGifs = FindObjectsOfType<UniGifImage_PortMod>();
         foreach (var UniGif in UniGifs)
@@ -73,7 +79,7 @@ public class Gallery : MonoBehaviour
     void ContinuationLoopReset()
     {
         CurrentNftsModelTotalCount = 0;
-        NFTsChecked = 0;
+        NFTsCheckedinCurrentModel = 0;
         gifloopInt = 0;
     }
 
@@ -87,7 +93,7 @@ public class Gallery : MonoBehaviour
     void CheckModeAndGo(string continuation = "")
     {
         if (_galleryController.contractMode)
-            ContractMode(continuation);
+            ContractMode();
         else
         {
             AccountMode(continuation);
@@ -98,14 +104,33 @@ public class Gallery : MonoBehaviour
     {
         CheckWalletNFTs(continuation);
     }
-    public void ContractMode(string continuation = "")
+    public void ContractMode()
     {
-        CheckContractNFTs(continuation);
+        if (firstContinuationLoop)
+        {
+            CheckContractNFTs();
+            firstContinuationLoop = false;
+        }
+        else
+        {
+            NftsCheckedInCollection = (ContinuationContractModePageNumb * 50);// one API call provides max 50 nfts
+            if(NftsCheckedInCollection < TotalNftsOfCollection)
+                CheckContractNFTs();
+            else
+            {
+                Debug.Log("All NFTs of this collection have been queried");
+            }
+        }
     }
-    
-    void CheckContractNFTs(string continuation = "")
+
+    private bool firstContinuationLoop = true;
+    [ReadOnly]public int ContinuationContractModePageNumb = 0;
+    [ReadOnly]public int TotalNftsOfCollection = 0;
+    [ReadOnly]public int NftsCheckedInCollection = 0;
+    void CheckContractNFTs()
     {
-        Debug.Log("Using NFTPort : NFTs of Contract on " + _galleryController.GetChainFromDropDownSelectContract());
+        Debug.Log("Using NFTPort : NFTs of Contract on " + _galleryController.GetChainFromDropDownSelectContract()); 
+        ContinuationContractModePageNumb++;
         
         //From https://docs.nftport.xyz/docs/nftport/ZG9jOjUzNjI2MzQ0-nf-ts-of-a-contract-collection
         _nfTsOfAContract
@@ -113,7 +138,7 @@ public class Gallery : MonoBehaviour
             .SetContractAddress(_galleryController.CollectionAddressInput.text)
             .SetInclude(NFTs_OfAContract.Includes.metadata)
             //.OnError(error=>Debug.Log(error)) 
-            .SetContinuation(continuation)
+            .SetContinuation(ContinuationContractModePageNumb)
             .OnComplete(NFTsOfContract=> DownloadAssets(NFTsOfContract))
             .Run();
     }
@@ -138,6 +163,9 @@ public class Gallery : MonoBehaviour
     //Determine ContentType of Assets we want to Download for NFTs for Main Frame
     void DownloadAssets(NFTs_model NFTsModel)
     {
+        if(NFTsModel.total != null)
+            TotalNftsOfCollection = NFTsModel.total; //Total NFTs of collection - Used for continuation for NFTs of contract
+        
         CurrentNftsModelTotalCount = NFTsModel.nfts.Count; //CurrentNftsModelTotalCount used for API pagination/continuation at end
         continuation = NFTsModel.continuation;
         
@@ -161,6 +189,7 @@ public class Gallery : MonoBehaviour
                 //content-type to download
                 var temp = AssetDownloader.DetemineURLContentType
                     .Initialize()
+                    //.OnError(error => Debug.Log(error))
                     .OnError(error => NFTsCheckedPlus())
                     .OnComplete((nft, contentType) => HandleAssetContentType(nft, contentType))
                     .Run(nft, NFTFileURLCacheCheck(nft));
@@ -171,6 +200,9 @@ public class Gallery : MonoBehaviour
                 NFTsCheckedPlus();
             }
         }
+        
+        //Remove Null elements from List - used in continuation , where previous asset downloaders have ended
+        AssetDlImages.RemoveAll(x => x == null);
     }
 
 
@@ -201,6 +233,7 @@ public class Gallery : MonoBehaviour
         {
             var aDownloadGetImage = AssetDownloader.GetImage
                 .Initialize()
+                //.OnError(error => Debug.Log(error))
                 .OnError(error => NFTsCheckedPlus())
                 //.OnComplete(NFTtexture => LinkNFTtoGalleryFrame(NFTtexture))
                 .OnCompleteReturnLinkedNft(nft,ReturnedNft => LinkNFTtoGalleryFrameTexture(ReturnedNft))
@@ -244,6 +277,7 @@ public class Gallery : MonoBehaviour
                         {
                             _galleryReUsableAssets.UniGifRemove(unigif);
                             NFTsCheckedPlus();
+                            //Debug.Log(errorStr);
                         })
                         .AddNft(nft)
                         .SetGifFromUrl(fileUrl, false)
@@ -346,18 +380,19 @@ public class Gallery : MonoBehaviour
     }
     
     //For API Pagination ->
-    public int NFTsChecked;
-    public int CurrentNftsModelTotalCount;
+    [ReadOnly]public int NFTsCheckedinCurrentModel;
+    [ReadOnly]public int CurrentNftsModelTotalCount;
     private string continuation = "";
     void NFTsCheckedPlus()
     {
-        NFTsChecked++;
+        NFTsCheckedinCurrentModel++;
         if (!allFramesFilled)
         {
-            if (NFTsChecked == CurrentNftsModelTotalCount - 8 && CurrentNftsModelTotalCount == 50) //API Provides Max only 50 NFts per req, we use this to reloop next batch with a buffer of -8 for  any downloaders are going
+            if (NFTsCheckedinCurrentModel > CurrentNftsModelTotalCount - StartNextLoopWhenThisNumberofFramesifStillDownloading && CurrentNftsModelTotalCount == 50) //API Provides Max only 50 NFts per req, we use this to reloop next batch with a buffer of -8 for  any downloaders are going
             {
-                Debug.Log("Continuation Loop");
-                ContinuationLoopToNextBatch(continuation);
+                //ContinuationLoopToNextBatch(continuation);
+                if(!ContLoopWaiting)
+                    StartCoroutine(Continuation());
             }
         }
         else
@@ -365,6 +400,17 @@ public class Gallery : MonoBehaviour
             Debug.Log("All Gallery Frames Filled");
         }
     }
+    
+    private bool ContLoopWaiting = false;
+    IEnumerator Continuation()
+    {
+        ContLoopWaiting = true;
+        yield return new WaitForSeconds(WaitBeforeContinuation);
+        Debug.Log("Continuation Loop");
+        ContinuationLoopToNextBatch(continuation);
+        ContLoopWaiting = false;
+    }
+    
 
     void KillAnyUniGifsStillDownloading()
     {
