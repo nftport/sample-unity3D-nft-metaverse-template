@@ -22,9 +22,11 @@ namespace NFTPort.Editor
                 return;
 
             _readme = AssetDatabase.LoadAssetAtPath<Readme_NFTPort>(ReadMePath());
-
-            if (!_readme.notFirstload)
+            if(_readme){
+if (!_readme.notFirstload)
                 FirstLoad();
+}
+            
         }     
 
         static void FirstLoad()
