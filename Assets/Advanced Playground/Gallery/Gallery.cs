@@ -49,7 +49,7 @@ public class Gallery : MonoBehaviour
         framesFilled = 0;
         allFramesFilled = false;
         NftsWithGif.Clear();
-        GifLoopRunning = false;
+        //GifLoopRunning = false;
         ContinuationContractModePageNumb = 0;
         NftsCheckedInCollection = 0;
         firstContinuationLoop = true;
@@ -80,7 +80,7 @@ public class Gallery : MonoBehaviour
     {
         CurrentNftsModelTotalCount = 0;
         NFTsCheckedinCurrentModel = 0;
-        gifloopInt = 0;
+        //gifloopInt = 0;
     }
 
     void ContinuationLoopToNextBatch(string continuation)
@@ -163,7 +163,7 @@ public class Gallery : MonoBehaviour
     //Determine ContentType of Assets we want to Download for NFTs for Main Frame
     void DownloadAssets(NFTs_model NFTsModel)
     {
-        if(NFTsModel.total != null)
+        if(NFTsModel.total != 0)
             TotalNftsOfCollection = NFTsModel.total; //Total NFTs of collection - Used for continuation for NFTs of contract
         
         CurrentNftsModelTotalCount = NFTsModel.nfts.Count; //CurrentNftsModelTotalCount used for API pagination/continuation at end
@@ -298,9 +298,10 @@ public class Gallery : MonoBehaviour
         }
     }
     
+    /*
     private bool GifLoopRunning;
     private int gifloopInt;
-    /*
+    
     public int GifDownloaderstoRunMultiplier;
     void GifDownLoadLoop()
     {
