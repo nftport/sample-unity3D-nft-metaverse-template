@@ -384,7 +384,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -824,7 +824,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -979,7 +979,7 @@ Transform:
   m_GameObject: {fileID: 2075052097752214319}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0, y: -0.25, z: 1.815}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.02, y: 0.02, z: 0.02}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8081701492894781342}
@@ -1048,16 +1048,39 @@ MonoBehaviour:
       animation_url: 
       dna: 
       id: 
+      properties: []
+      seller_fee_basis_points: 0
+      symbol: 
+      collection:
+        family: 
+        name: 
+      thumbnail_url: 
+      cached_thumbnail_url: 
+      banner_url: 
+      cached_banner_url: 
+      external_link: 
+      destination_url: 
+      first_name: 
+      image_card: 
+      image_transparent: 
+      last_name: 
+      short_name: 
     description: 
     creator_address: 
+    mint_address: 
+    collection_id: 
+    on_chain_collection_key: 
+    owner: 
     file_url: 
     cached_file_url: 
     animation_url: 
     cached_animation_url: 
+    mint_date: 
     file_information:
       height: 0
       width: 0
       file_size: 0
+    updated_date: 
     metadata_url: 
     token_id: 
     contract_address: 

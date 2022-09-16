@@ -15,9 +15,6 @@ public class ObjectInteract : MonoBehaviour
 
     void OnMouseDown()
     {
-        
-        Debug.Log("CLICK");
-        
         if(OnClick!=null)
             OnClick.Invoke();
 

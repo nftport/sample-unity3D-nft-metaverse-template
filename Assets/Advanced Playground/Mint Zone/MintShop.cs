@@ -20,129 +20,260 @@ namespace NFTPort.Samples
         [SerializeField] private AudioSource audioPlayer;
         [SerializeField] private AudioClip mintSuccessAudio;
         [SerializeField] private AudioClip mintErrorAudio;
+        [SerializeField] private AudioClip alreadyMintedAudio;
 
         [Header("Easy Mint URL Parameters")]
-        [SerializeField] private Mint_URL _mintURL;
-        [SerializeField] private TMP_InputField _mintURLInputField;
+        [SerializeField] private Mint_URL mintURL;
+        [SerializeField] private TMP_InputField mintURLInputField;
+        [SerializeField] private bool isMintedURL = false;
         
         [Header("Easy Mint File Parameters")]
-        [SerializeField] private Mint_File _mintFile;
-        [SerializeField] private TMP_InputField _mintFileInputField;
+        [SerializeField] private Mint_File mintFile;
+        [SerializeField] private TMP_InputField mintFileInputField;
         [SerializeField] private string nameOfGameObjectInStreamingAssetssFolder;
+        [SerializeField] private bool isMintedFile  = false;
 
         [Header("Custom Mint Parameters")] 
-        [SerializeField] private Storage_UploadMetadata _storageUploadMetadata;
-        [SerializeField] private Mint_Custom _mintCustom;
-        [SerializeField] private ExportGameobject _exportGameobject;
+        [SerializeField] private TakeScreenshotFromCamera takeScreenshotFromCamera;
+        [SerializeField] private ExportGameobject exportGameobject;
         [SerializeField] private GameObject gameObjectToExportRoot;
+        [SerializeField] private Storage_UploadFile storageUploadFile;
+        [SerializeField] private Storage_UploadMetadata storageUploadMetadata;
+        [SerializeField] private Mint_Custom mintCustom;
+        [SerializeField] GameObject customMaterialGameObject;
+        [SerializeField] public ColorPicker colorPicker; 
+        [SerializeField] private bool isMintedCustom  = false;
+
+        enum MintType
+        {
+            URL,
+            File,
+            Custom
+        }
 
         public void ZoneStart()
         {
             onMintZoneStarted.Invoke();
-            shopCharAnimator.SetBool("HelloWave", true);
+            if(shopCharAnimator)
+                shopCharAnimator.SetBool("HelloWave", true);
         }
         
         public void ZoneExit()
         {
             onMintZoneSEnded.Invoke();
-            shopCharAnimator.SetBool("HelloWave", false);
+            if(shopCharAnimator)
+                shopCharAnimator.SetBool("HelloWave", false);
         }
 
         public void EasyMintURL()
         {
-            shopCharAnimator.SetTrigger("objectInteract");
-            
+            if(shopCharAnimator)
+                shopCharAnimator.SetTrigger("objectInteract");
+
+            if (isMintedURL)
+            {
+                AlreadyMinted();
+                return;
+            }
+
             //Via https://docs.nftport.xyz/docs/nftport/ZG9jOjU1MDM4OTgw-easy-minting-w-url
-            _mintURL
+            mintURL
                 .SetChain(Mint_URL.Chains.polygon)
                 .SetParameters(
                     //FileURL: "https://i.imgur.com/tzAbx5D.png", //We have set this in editor, new value can be passed here to override.
                     //Name: "NFTPort.xyz",  //We have set this in editor, new value can be passed here to override.
-                    Description: "Custom player description: " + _mintURLInputField.text,
+                    Description: "Custom player description: " + mintURLInputField.text,
                     MintToAddress: Port.ConnectedPlayerAddress
                 )
                 .OnError(error=> ReturnedError(error))
-                .OnComplete(Minted=> MintSuccess(Minted))
+                .OnComplete(Minted=> MintSuccess(Minted, MintType.URL))
                 .Run();
         }
 
         public void EasyMintFile()
         {
-            shopCharAnimator.SetTrigger("objectInteract");
+            if(shopCharAnimator)
+                shopCharAnimator.SetTrigger("objectInteract");
+            
+            if (isMintedFile)
+            {
+                AlreadyMinted();
+                return;
+            }
             
             // via https://docs.nftport.xyz/docs/nftport/ZG9jOjczMDEwMjIx-easy-minting-with-file-upload
-            _mintFile
+            mintFile
                 .SetChain(Mint_File.Chains.polygon)
                 .SetParameters(
                     FilePath: Path.Combine(Application.streamingAssetsPath, nameOfGameObjectInStreamingAssetssFolder),
                     //Name: "Awesome NFT", //We have set this in editor, new value can be passed here to override.
-                    Description: "Custom player description: " + _mintFileInputField.text,
+                    Description: "Custom player description: " + mintFileInputField.text,
                     MintToAddress: Port.ConnectedPlayerAddress
                 )
                 .OnStarted(started => Debug.Log(started))
                 .OnProgress(percent => Debug.Log("Uploading File: " + percent.ToString() + "%"))
                 .OnError(error=> ReturnedError(error))
-                .OnComplete(Minted=> MintSuccess(Minted))
+                .OnComplete(Minted=> MintSuccess(Minted, MintType.File))
                 .Run();
         }
 
-        private void OnEnable()
-        {
-            CustomMintProcess();
-        }
 
+        #region Custom Mint + Runtiime generated NFT Screenshot and 3D Model
+
+        private bool _customNftImageUploaded = false;
+        private string _customNftImageURL;
+        private bool _customNftAssetUploaded = false;
+        private string _customNftAssetURL;
         public void CustomMintProcess()
         {
-            shopCharAnimator.SetTrigger("objectInteract");
+            if(shopCharAnimator)
+                shopCharAnimator.SetTrigger("objectInteract");
             
-            //We will create a custom procedural gameObject according to user Input
-            CreateCustomPotion();
-            
+            if (isMintedCustom)
+            {
+                AlreadyMinted();
+                return;
+            }
+
+            //0. We will also create a procedural gameObject and metadata according to user Input, Similar can be done for EasyMint with File.
+            _customNftImageUploaded = false;
+            _customNftAssetUploaded = false;
+            CreateCustomGameObject();
+            CreateAScreeenShotImageForNFT();
             //via https://docs.nftport.xyz/docs/nftport/ZG9jOjYzMDIzNDgx-customizable-minting
             //1. we have already deployed a custom product contract via document page under custom mint and noted the contract_address provided by it.
-            //2. We have uploaded an Image and a 3D object via Storage_FileUpload and noted the urls of it, this step can also be added by code if objects are procedural.
+            //2. We uploaded 3D object via Storage_FileUpload and note the urls of it.
             //3  We Create and Upload custom metadata according to user input
             //4. We Run the Custom Mint.
         }
 
-        void CreateCustomPotion()
+        void CreateAScreeenShotImageForNFT()
         {
+            var path = Application.persistentDataPath + "NFTImage.png";
+            if (takeScreenshotFromCamera.CreateAscreenShot(path))
+            {
+                //2. Upload Asset to IPFS
+                //via https://docs.nftport.xyz/docs/nftport/ZG9jOjYwODM0NTY3-storage-upload-file
+                Storage_UploadFile
+                    .Initialize()
+                    .SetFilePath(path)
+                    .OnStarted(a=> Debug.Log(a))
+                    .OnProgress(progress=> Debug.Log("Uploading NFTImage to IPFS: " + progress.ToString() + "%"))
+                    .OnError(error=> Debug.Log(error))
+                    .OnComplete(model => CheckIfBothImageAndAssetIsUploaded(_customNFTImageURL: model.ipfs_url))
+                    .Run();
+            }
+        }
+
+        #region Create 3D GLB and upload to IPFS
+        void CreateCustomGameObject() 
+        {
+            //0. Create some procedural GameObject 
+            customMaterialGameObject.GetComponent<MeshRenderer>().material.color = colorPicker.color;
             
+            //0. Export Procedural GameObject via GLTFast //https://github.com/atteneder/glTFast/blob/main/Documentation~/ExportRuntime.md
             var path = Application.persistentDataPath + "object.glb";
-            Debug.Log(path);
             var toExport = new GameObject[] {gameObjectToExportRoot };
-            _exportGameobject
-                .OnComplete(isSuccess => CreateCustomPotionComplete(isSuccess))
+            exportGameobject
+                .OnComplete(isSuccess => CreateCustomGameObjectComplete(isSuccess))
                 .AdvancedExport(path, toExport);
         }
 
-        void CreateCustomPotionComplete(bool isSuccess)
+        void CreateCustomGameObjectComplete(bool isSuccess)
         {
-            //f (isSuccess)
-                //UploadCusomMetadata();
+            if (isSuccess)
+                UploadObjectToIPFS();
+            else
+            {
+                ReturnedError("Unable to create custom GLB Object");
+            }
         }
 
-        void UploadCusomMetadata()
+        void UploadObjectToIPFS()
         {
+            //2. Upload our 3D Asset to IPFS
+            //via https://docs.nftport.xyz/docs/nftport/ZG9jOjYwODM0NTY3-storage-upload-file
+            storageUploadFile
+                .SetFilePath(Application.persistentDataPath + "object.glb")
+                .OnStarted(a=> Debug.Log(a))
+                .OnProgress(progress=> Debug.Log("Uploading Procedural Object to IPFS: " + progress.ToString() + "%"))
+                .OnError(error=> Debug.Log(error))
+                .OnComplete(model => CheckIfBothImageAndAssetIsUploaded(_customNFTAssetURL: model.ipfs_url))
+                .Run();
+        }
+        #endregion
+
+        void CheckIfBothImageAndAssetIsUploaded(string _customNFTImageURL = null,  string _customNFTAssetURL = null)
+        {
+            if (_customNFTImageURL != null)
+            {
+                _customNftImageUploaded = true;
+                _customNftImageURL = _customNFTImageURL;
+            }
+               
+            if (_customNFTAssetURL != null)
+            {
+                _customNftAssetUploaded = true;
+                _customNftAssetURL = _customNFTAssetURL;
+            }
+                
+
+            if (_customNftImageUploaded && _customNftAssetUploaded)
+            {
+                Debug.Log(_customNftImageURL);
+                Debug.Log(_customNftAssetURL);
+                
+                UploadCusomMetadatatoIPFS();
+            }
+                
+        }
+
+        void UploadCusomMetadatatoIPFS()
+        {
+            //3. Create Custom Metadata
             Storage_MetadataToUpload_model metadataModel = new Storage_MetadataToUpload_model
             {
-                file_url = "https://ipfs.io/ipfs/bafkreig4azycjdng6odwqp5s32rp55gdanaiw7blyl4eehzbhxom52ciui",
-                name = "NFTPort Unity SDK",
-                description = "Fast track your game development in Unity at NFTPort SDK with cross chain NFTs and fast and reliable data",
+                file_url = _customNftImageURL, //Got via CreateAScreeenShotImageForNFT()
+                name = "Magic Potion",
+                description = "A custom runtime generated magic potion according to player color input. NFT image, 3D GLB Asset and Metadata which includes color information and date NFT is minted, all generated at runtime game via custom mint NFTPort Unity SDK feature.",
                 external_url = "https://github.com/nftport/nftport-unity",
-                animation_url = "https://design.embracingearth.space/wp-content/uploads/2022/05/index.html",
+                animation_url = _customNftAssetURL, //Got via UploadObjectToIPFS()
                 attributes = new List<Attribute>{
                     new Attribute
                     {
-                        trait_type = "Power",
-                        value = "Fireball"
-                    }},
-                custom_fields = new List<custom_fields>{
-                    new custom_fields
-                    {
-                        key = "wow factor",
-                        value = "(இ௦இ)꒳ᵒ꒳ᵎᵎᵎ"
+                        trait_type = "Potion Version",
+                        value = "1",
+                        max_value = 7,
+                        display_type = Displaytype.number
                     },
+                    new Attribute
+                    {
+                        trait_type = "Color",
+                        value = colorPicker.color.ToString() // User Input for Color
+                    },
+                    new Attribute
+                    {
+                        trait_type = "Date Minted", //following https://docs.opensea.io/docs/metadata-standards#date-traits
+                        value = ((int)(System.DateTime.UtcNow - new System.DateTime(1970, 1, 1, 0, 0, 0, System.DateTimeKind.Utc)).TotalSeconds).ToString(),
+                        display_type = Displaytype.date
+                    },
+                    new Attribute
+                    {
+                        trait_type = "Via",
+                        value = "NFTPort.xyz Unity Gaming SDK"
+                    },
+                    new Attribute
+                    {
+                        trait_type = "Feature",
+                        value = "Custom Mint"
+                    },
+                    new Attribute
+                    {
+                        trait_type = "compiler",
+                        value = "sz-101"
+                    },
+                },
+                custom_fields = new List<custom_fields>{
                     new custom_fields
                     {
                         key = "compiler",
@@ -153,21 +284,11 @@ namespace NFTPort.Samples
                         key = "dna",
                         value = "T2T-CHM13"
                     },
-                    new custom_fields
-                    {
-                        key = "background_color",
-                        value = "Skobeloff"
-                    },
-                    new custom_fields
-                    {
-                        key = "id",
-                        value = "Ser-007"
-                    }
                 },
             };
             
-            
-            _storageUploadMetadata
+            //3. Upload Custom Metadata
+            storageUploadMetadata
                 .SetMetadata(metadataModel)
                 .OnStarted(a=> Debug.Log(a))
                 //.OnProgress(progress=> Debug.Log(progress.ToString()))
@@ -175,39 +296,67 @@ namespace NFTPort.Samples
                 .OnComplete(storageModel=> CustomMint(storageModel))
                 .Run();
         }
-
+        
         void CustomMint(Storage_model.Storage metadataStorageModel)
         {
-            _mintCustom
+            //4. Final Step: Custom Mint
+            mintCustom
                 .SetChain(Mint_Custom.Chains.polygon)
                 .SetParameters(
                     contract_address: "0x42B57de948D05d17Fb11d4E527DF80A0420A4392",
-                    metadata_uri: metadataStorageModel.ipfs_uri,
+                    metadata_uri: metadataStorageModel.metadata_uri,
                     MintToAddress: Port.ConnectedPlayerAddress,
                     token_id: 0 //Set to 0 to mint to any available ID.
                 )
                 .OnError(error=> ReturnedError(error))
-                .OnComplete(Minted=> MintSuccess(Minted))
+                .OnComplete(Minted=> MintSuccess(Minted, MintType.Custom))
                 .Run();
-                
         }
-
+        #endregion
 
         public void ObjectClicked()
         {
-            shopCharAnimator.SetTrigger("handyes");
+            if(shopCharAnimator)
+                shopCharAnimator.SetTrigger("handyes");
         }
         void ReturnedError(string error)
         {
             Debug.Log(error); 
-            shopCharAnimator.SetTrigger("no");
+            if(shopCharAnimator)
+                shopCharAnimator.SetTrigger("no");
             audioPlayer.clip = mintErrorAudio;
             audioPlayer.Play();
         }
-        void MintSuccess(Minted_model mintedModel)
+        void MintSuccess(Minted_model mintedModel, MintType mintType)
         {
-            shopCharAnimator.SetTrigger("nod");
+            if(shopCharAnimator)
+                shopCharAnimator.SetTrigger("nod");
             audioPlayer.clip = mintSuccessAudio;
+            audioPlayer.Play();
+
+            //We check is user has already minted. 
+            //This is just a local check - to have more proper check call API endpoint NFTs of Account and filter from Game connection
+            //Then compare NFT name the account holds. Or Use Transactions of Account Feature and filter by Type Mint.
+            switch (mintType)
+            {
+                case MintType.Custom:
+                    isMintedCustom = true;
+                    break;
+                case MintType.File:
+                    isMintedFile = true;
+                    break;
+                case MintType.URL:
+                    isMintedURL = true;
+                    break;
+                    
+            }
+        }
+        void AlreadyMinted()
+        {
+            if(shopCharAnimator)
+                shopCharAnimator.SetTrigger("no");
+            
+            audioPlayer.clip = alreadyMintedAudio;
             audioPlayer.Play();
         }
     }
