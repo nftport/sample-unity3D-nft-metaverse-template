@@ -16,7 +16,7 @@ public class TakeScreenshotFromCamera : MonoBehaviour
     public bool CreateAscreenShot(string savePath)
     {
         camera.gameObject.SetActive(true);
-        RenderTexture rt = new RenderTexture(resWidth, resHeight, colorFormat: GraphicsFormat.B10G11R11_UFloatPack32, GraphicsFormat.B10G11R11_UFloatPack32);
+        RenderTexture rt = new RenderTexture(resWidth, resHeight, colorFormat: GraphicsFormat.B10G11R11_UFloatPack32, GraphicsFormat.D32_SFloat);
         camera.targetTexture = rt;
         Texture2D screenShot = new Texture2D(resWidth, resHeight, TextureFormat.RGB24, false);
         camera.Render();

@@ -100,12 +100,15 @@ namespace NFTPort.Samples
                 AlreadyMinted();
                 return;
             }
+
+            var path = Path.Combine(Application.streamingAssetsPath, nameOfGameObjectInStreamingAssetssFolder);
+            Debug.Log("Easy Minting File at " + path);
             
             // via https://docs.nftport.xyz/docs/nftport/ZG9jOjczMDEwMjIx-easy-minting-with-file-upload
             mintFile
                 .SetChain(Mint_File.Chains.polygon)
                 .SetParameters(
-                    FilePath: Path.Combine(Application.streamingAssetsPath, nameOfGameObjectInStreamingAssetssFolder),
+                    FilePath: path,
                     //Name: "Awesome NFT", //We have set this in editor, new value can be passed here to override.
                     Description: "Custom player description: " + mintFileInputField.text,
                     MintToAddress: Port.ConnectedPlayerAddress
@@ -145,10 +148,14 @@ namespace NFTPort.Samples
             //2. We uploaded 3D object via Storage_FileUpload and note the urls of it.
             //3  We Create and Upload custom metadata according to user input
             //4. We Run the Custom Mint.
+            
+            //dispose any previous  running request in case.
+            storageUploadFile.Stop(false);
         }
 
         void CreateAScreeenShotImageForNFT()
         {
+            Debug.Log("Creating NFT image");
             var path = Application.persistentDataPath + "NFTImage.png";
             if (takeScreenshotFromCamera.CreateAscreenShot(path))
             {
@@ -163,11 +170,16 @@ namespace NFTPort.Samples
                     .OnComplete(model => CheckIfBothImageAndAssetIsUploaded(_customNFTImageURL: model.ipfs_url))
                     .Run();
             }
+            else
+            {
+                Debug.Log("Error creating NFT Image");
+            }
         }
 
         #region Create 3D GLB and upload to IPFS
         void CreateCustomGameObject() 
         {
+            Debug.Log("Creating NFT 3D Object");
             //0. Create some procedural GameObject 
             customMaterialGameObject.GetComponent<MeshRenderer>().material.color = colorPicker.color;
             
