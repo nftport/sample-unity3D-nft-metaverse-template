@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using NFTPort;
 using TMPro;
+using UnityEngine.Rendering.Universal;
 using Object = System.Object;
 
 
@@ -101,10 +102,10 @@ namespace NFTPort.Samples
                 return;
             }
 
+
             var path = Path.Combine(Application.streamingAssetsPath, nameOfGameObjectInStreamingAssetssFolder);
-            Debug.Log("Easy Minting File at " + path);
-            
-            // via https://docs.nftport.xyz/docs/nftport/ZG9jOjczMDEwMjIx-easy-minting-with-file-upload
+
+              // via https://docs.nftport.xyz/docs/nftport/ZG9jOjczMDEwMjIx-easy-minting-with-file-upload
             mintFile
                 .SetChain(Mint_File.Chains.polygon)
                 .SetParameters(
@@ -129,6 +130,9 @@ namespace NFTPort.Samples
         private string _customNftAssetURL;
         public void CustomMintProcess()
         {
+            
+            //storageUploadFile.Stop(false); /dispose any previous running request for custom min 3D object file upload in case.
+            
             if(shopCharAnimator)
                 shopCharAnimator.SetTrigger("objectInteract");
             
@@ -148,14 +152,11 @@ namespace NFTPort.Samples
             //2. We uploaded 3D object via Storage_FileUpload and note the urls of it.
             //3  We Create and Upload custom metadata according to user input
             //4. We Run the Custom Mint.
-            
-            //dispose any previous  running request in case.
-            storageUploadFile.Stop(false);
         }
 
         void CreateAScreeenShotImageForNFT()
         {
-            Debug.Log("Creating NFT image");
+            Debug.Log("Creating NFT Image,");
             var path = Application.persistentDataPath + "NFTImage.png";
             if (takeScreenshotFromCamera.CreateAscreenShot(path))
             {
@@ -179,25 +180,30 @@ namespace NFTPort.Samples
         #region Create 3D GLB and upload to IPFS
         void CreateCustomGameObject() 
         {
-            Debug.Log("Creating NFT 3D Object");
+            Debug.Log("Creating NFT 3D Object to IPFS");
             //0. Create some procedural GameObject 
             customMaterialGameObject.GetComponent<MeshRenderer>().material.color = colorPicker.color;
             
             //0. Export Procedural GameObject via GLTFast //https://github.com/atteneder/glTFast/blob/main/Documentation~/ExportRuntime.md
             var path = Application.persistentDataPath + "object.glb";
+            Debug.Log(path);
             var toExport = new GameObject[] {gameObjectToExportRoot };
             exportGameobject
-                .OnComplete(isSuccess => CreateCustomGameObjectComplete(isSuccess))
+                .OnComplete(isSuccess => CreateCustomGameObjectComplete(isSuccess, path))
                 .AdvancedExport(path, toExport);
         }
 
-        void CreateCustomGameObjectComplete(bool isSuccess)
+        void CreateCustomGameObjectComplete(bool isSuccess, string path)
         {
             if (isSuccess)
+            {
+                Debug.Log("Custom Gameobject Made at: " + path);
                 UploadObjectToIPFS();
+            }
             else
             {
-                ReturnedError("Unable to create custom GLB Object");
+                Debug.Log("Unable to create custom GLB Object, Minting with Image");
+                UploadCusomMetadatatoIPFS();
             }
         }
 
@@ -221,14 +227,15 @@ namespace NFTPort.Samples
             {
                 _customNftImageUploaded = true;
                 _customNftImageURL = _customNFTImageURL;
+                Debug.Log("Uploaded Custom Image to IPFS");
             }
                
             if (_customNFTAssetURL != null)
             {
                 _customNftAssetUploaded = true;
                 _customNftAssetURL = _customNFTAssetURL;
+                Debug.Log("Uploaded Custom 3D Object to IPFS");
             }
-                
 
             if (_customNftImageUploaded && _customNftAssetUploaded)
             {
@@ -242,6 +249,8 @@ namespace NFTPort.Samples
 
         void UploadCusomMetadatatoIPFS()
         {
+            Debug.Log("Creatind and Uploading custom metadata to IPFS");
+            
             //3. Create Custom Metadata
             Storage_MetadataToUpload_model metadataModel = new Storage_MetadataToUpload_model
             {

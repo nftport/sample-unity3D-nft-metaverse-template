@@ -47,11 +47,20 @@ public class ExportGameobject : MonoBehaviour
         // Example of gathering GameObjects to be exported (recursively)
         var rootLevelNodes = toExport;
 
+        bool success;
+        
         // Add a scene
-        export.AddScene(rootLevelNodes, "My new glTF scene");
+        if (export.AddScene(rootLevelNodes, "My new glTF scene"))
+        {
+            // Async glTF export
+            success = await export.SaveToFileAndDispose(Savepath);
+        }
+        else
+        {
+            success = false;
+        }
 
-        // Async glTF export
-        bool success = await export.SaveToFileAndDispose(Savepath);
+       
 
         if(!success) {
             Debug.LogError("Something went wrong exporting a glTF");
