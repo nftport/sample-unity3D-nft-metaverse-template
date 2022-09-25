@@ -10,15 +10,17 @@ namespace NFTPort.Samples
 
     public class CustomMintSample : MonoBehaviour
     {
+        [Header("Mints NFT when a 'Player' tag enters the collider trigger and presses SpaceBar")]
         [SerializeField] private Mint_Custom _mintCustom;
         [SerializeField] private Text output;
         [SerializeField] private GameObject Panel;
         
+        [Header("Makes Animator speed 2x on success")]
         [SerializeField] private Animator animator;
         
-        [SerializeField] private Transform objectTransform;
-        [SerializeField] private Transform targetTransform;
-
+        [Header("Move an Object after Success")]
+        [SerializeField] private Transform objectToTransformAfterSuccess;
+        [SerializeField] private Transform targetTransformForTheObject;
         [SerializeField] private Vector3 velocity;
 
         [SerializeField] private UnityEvent Aftermint;
@@ -59,9 +61,9 @@ namespace NFTPort.Samples
                 }
             }
             
-            if(isMinted)
+            if(isMinted && targetTransformForTheObject!= null)
             {
-                objectTransform.position = Vector3.SmoothDamp(objectTransform.position, targetTransform.position, ref velocity, 0.5f, 10);
+                objectToTransformAfterSuccess.position = Vector3.SmoothDamp(objectToTransformAfterSuccess.position, targetTransformForTheObject.position, ref velocity, 0.5f, 10);
             }
         }
 
@@ -90,7 +92,9 @@ namespace NFTPort.Samples
 
         void AfterMint()
         {
-            animator.speed = 5f;
+            if(animator)
+                animator.speed = 5f;
+            
             isMinted = true;
             Aftermint.Invoke();
         }
