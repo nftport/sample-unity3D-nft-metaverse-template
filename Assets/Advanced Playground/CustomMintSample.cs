@@ -75,7 +75,7 @@ namespace NFTPort.Samples
                 .OnComplete(minted => OnMintComplete(minted))
                 .SetParameters(
                     //We are referencing it and have already set other parameters on the component in editor.
-                        MintToAddress: Port.ConnectedPlayerAddress //connected via NFTPort Player Connect WebGL build feature
+                        mintToAddress: Port.ConnectedPlayerAddress //connected via NFTPort Player Connect WebGL build feature
                         )
                 .Run();
         }
