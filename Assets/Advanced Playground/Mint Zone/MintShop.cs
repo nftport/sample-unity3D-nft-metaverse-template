@@ -229,7 +229,9 @@ namespace NFTPort.Samples
                 _customNftImageURL = _customNFTImageURL;
                 Debug.Log("Uploaded Custom Image to IPFS");
             }
-               
+            
+            //webgl ovwerride for 3d object
+            /*
             if (_customNFTAssetURL != null)
             {
                 _customNftAssetUploaded = true;
@@ -241,9 +243,9 @@ namespace NFTPort.Samples
             {
                 Debug.Log(_customNftImageURL);
                 Debug.Log(_customNftAssetURL);
-                
+                */
                 UploadCusomMetadatatoIPFS();
-            }
+           // }
                 
         }
 
@@ -326,7 +328,7 @@ namespace NFTPort.Samples
                 .SetParameters(
                     contract_address: "0x42B57de948D05d17Fb11d4E527DF80A0420A4392",
                     metadata_uri: metadataStorageModel.metadata_uri,
-                    MintToAddress: Port.ConnectedPlayerAddress,
+                    mintToAddress: Port.ConnectedPlayerAddress,
                     token_id: 0 //Set to 0 to mint to any available ID.
                 )
                 .OnError(error=> ReturnedError(error))

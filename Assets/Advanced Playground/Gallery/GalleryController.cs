@@ -90,7 +90,7 @@ public class GalleryController : MonoBehaviour
         else if(galleryNetworkDropdownSelect.value == 1)
             return NFTs_OwnedByAnAccount.Chains.polygon;
         else 
-            return NFTs_OwnedByAnAccount.Chains.rinkeby;
+            return NFTs_OwnedByAnAccount.Chains.goerli;
     }
 
     void PopulateChainDropDownListAccount()
@@ -101,14 +101,14 @@ public class GalleryController : MonoBehaviour
         galleryNetworkDropdownSelect.AddOptions(chainNames);
     }
     
-    public NFTs_OfAContract.Chains GetChainFromDropDownSelectContract()
+    public NFTs_OfACollection.Chains GetChainFromDropDownSelectContract()
     {
         if (galleryNetworkDropdownSelect.value == 0)
-            return NFTs_OfAContract.Chains.ethereum;
+            return NFTs_OfACollection.Chains.ethereum;
         else if(galleryNetworkDropdownSelect.value == 1)
-            return NFTs_OfAContract.Chains.polygon;
+            return NFTs_OfACollection.Chains.polygon;
         else 
-            return NFTs_OfAContract.Chains.rinkeby;
+            return NFTs_OfACollection.Chains.goerli;
     }
 
     void PopulateChainDropDownListContract()
