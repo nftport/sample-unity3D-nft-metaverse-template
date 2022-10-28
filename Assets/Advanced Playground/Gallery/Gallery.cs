@@ -4,8 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using NFTPort;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-[RequireComponent(typeof(NFTs_OfAContract))]
+[RequireComponent(typeof(NFTs_OfACollection))]
 [RequireComponent(typeof(NFTs_OwnedByAnAccount))]
 public class Gallery : MonoBehaviour
 {
@@ -13,7 +14,7 @@ public class Gallery : MonoBehaviour
     [SerializeField] private GalleryController _galleryController;
     [SerializeField] private GalleryReUsableAssets _galleryReUsableAssets;
     [SerializeField] NFTs_OwnedByAnAccount _nfTOwnedByAnAccount;
-    [SerializeField] NFTs_OfAContract _nfTsOfAContract;
+    [FormerlySerializedAs("_nfTsOfAContract")] [SerializeField] NFTs_OfACollection _nfTsOfACollection;
     public float WaitBeforeContinuation = 0.01f;
     public int StartNextLoopWhenThisNumberofFramesifStillDownloading = 8;
     
@@ -24,8 +25,7 @@ public class Gallery : MonoBehaviour
 
     private void Start()
     {
-        Debug.Log("3D NFT Gallery | _sz_ | Worldsz");
-        Debug.Log("Poweredby NFTPort, Made With Unity, Supported by Ready Player Me");
+        // Debug.Log("NFTPort Metaverse Sample");
         SetGalleryFrames();
     }
 
@@ -133,10 +133,13 @@ public class Gallery : MonoBehaviour
         ContinuationContractModePageNumb++;
         
         //From https://docs.nftport.xyz/docs/nftport/ZG9jOjUzNjI2MzQ0-nf-ts-of-a-contract-collection
-        _nfTsOfAContract
+        _nfTsOfACollection
             .SetChain(_galleryController.GetChainFromDropDownSelectContract())
-            .SetContractAddress(_galleryController.CollectionAddressInput.text)
-            .SetInclude(NFTs_OfAContract.Includes.metadata)
+            .SetParameters(
+                
+                collection:_galleryController.CollectionAddressInput.text,
+                include:NFTs_OfACollection. Includes.metadata
+                )
             //.OnError(error=>Debug.Log(error)) 
             .SetContinuation(ContinuationContractModePageNumb)
             .OnComplete(NFTsOfContract=> DownloadAssets(NFTsOfContract))
@@ -152,7 +155,7 @@ public class Gallery : MonoBehaviour
             .SetChain(_galleryController.GetChainFromDropDownSelectAccount())
             .SetAddress(Port.ConnectedPlayerAddress)
             .SetInclude(NFTs_OwnedByAnAccount.Includes.metadata)
-            .SetFilterFromContract(_galleryController.FilterAccountFromContract.text)
+            .SetFilterFromCollection(_galleryController.FilterAccountFromContract.text)
             .SetContinuation(continuation)
             //.OnError(error=>Debug.Log(error)) 
             .OnComplete(NFTsOfUser=> DownloadAssets(NFTsOfUser))
