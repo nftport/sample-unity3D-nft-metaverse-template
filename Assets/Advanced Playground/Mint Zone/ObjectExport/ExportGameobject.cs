@@ -28,9 +28,9 @@ public class ExportGameobject : MonoBehaviour
         // ExportSettings allow you to configure the export
         // Check its source for details
         var exportSettings = new ExportSettings {
-            format = GltfFormat.Binary,
-            fileConflictResolution = FileConflictResolution.Overwrite,
-            imageDestination = ImageDestination.MainBuffer
+            Format = GltfFormat.Binary,
+            FileConflictResolution = FileConflictResolution.Overwrite,
+            ImageDestination = ImageDestination.MainBuffer
         };
 
         var gameObjectexportsettings = new GameObjectExportSettings(

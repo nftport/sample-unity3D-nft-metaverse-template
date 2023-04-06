@@ -185,16 +185,16 @@ public class GalleryNFT_frame : MonoBehaviour
         {
             gltf1 = this.ThreeDRoot.AddComponent<GltfAsset>();
         }
-        gltf1.loadOnStartup = false;
+        gltf1.LoadOnStartup = false;
         var success = await gltf1.Load(url,null,deferAgent, null, logger);
         //loadingEnd?.Invoke();
         
         if(success) {
-            if (!gltf1.currentSceneId.HasValue && gltf1.sceneCount > 0) {
+            // if (!gltf1.currentSceneId.HasValue && gltf1.sceneCount > 0) {
                 // Fallback to first scene
                 //Debug.LogWarning("glTF has no main scene. Falling back to first scene.");
                 gltf1.InstantiateScene(0);
-            }
+            // }
             Post3DDownloadSuccess();
             //GLTFast_onLoadComplete(gltf1); 
         }
