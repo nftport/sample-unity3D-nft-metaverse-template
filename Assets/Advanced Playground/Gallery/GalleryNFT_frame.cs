@@ -193,7 +193,7 @@ public class GalleryNFT_frame : MonoBehaviour
             // if (!gltf1.currentSceneId.HasValue && gltf1.sceneCount > 0) {
                 // Fallback to first scene
                 //Debug.LogWarning("glTF has no main scene. Falling back to first scene.");
-                gltf1.InstantiateScene(0);
+                await gltf1.InstantiateScene(0);
             // }
             Post3DDownloadSuccess();
             //GLTFast_onLoadComplete(gltf1); 
