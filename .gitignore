@@ -8,8 +8,10 @@
 /[Bb]uild/
 /[Bb]uilds/
 /IOS Builds/
+/Android Builds/
 /[Ll]ogs/
 /[Mm]emoryCaptures/
+/connectwebgl.zip
 
 # Asset meta data should only be ignored when the corresponding asset is also ignored
 !/[Aa]ssets/**/*.meta
