@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Nabeel.Scripts;
 using NFTPort;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,7 +12,7 @@ namespace NFTPort.Samples.Playground
     {
         [SerializeField] private Text[] walletTexts;
         [SerializeField] private InputField AddressInputField;
-        [SerializeField] private ConnectPlayerWallet _connectPlayerWallet;
+        [SerializeField] private MyConnectPlayerWallet _connectPlayerWallet;
 
         private void Start()
         {
