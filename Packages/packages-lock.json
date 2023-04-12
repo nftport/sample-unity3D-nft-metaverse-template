@@ -13,13 +13,12 @@
       "hash": "197f3b7e32ed733890935324f41c32d6599fc0cd"
     },
     "com.nftport.nftport": {
-      "version": "https://github.com/nftport/nftport-unity.git",
+      "version": "file:com.nftport.nftport@6b64a4a7c4",
       "depth": 0,
-      "source": "git",
+      "source": "embedded",
       "dependencies": {
         "com.unity.nuget.newtonsoft-json": "3.0.2"
-      },
-      "hash": "6b64a4a7c451193827de4f4de3a3c085f1112cdb"
+      }
     },
     "com.unity.burst": {
       "version": "1.8.2",
