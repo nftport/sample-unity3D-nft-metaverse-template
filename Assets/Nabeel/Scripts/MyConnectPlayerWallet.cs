@@ -55,11 +55,12 @@ namespace Nabeel.Scripts
                 return;
             }
             
-            if (MetaMaskUnity.Instance.Wallet.IsPaused)
-            {
-                Debug.Log("SendTransaction: Wallet is Paused!");
-                return;
-            }
+            // if (MetaMaskUnity.Instance.Wallet.IsPaused)
+            // {
+            //     Debug.Log("SendTransaction: Wallet is Paused!");
+            //     return;
+            // }
+            //
             
             if (addressInputField.text == String.Empty)
             {
@@ -70,7 +71,10 @@ namespace Nabeel.Scripts
             var transactionParams = new MetaMaskTransaction
             {
                 To = addressInputField.text,
+                // To = "0x1884Ad0d9C35329C71584Bb684EC8f1Af2d7655a",
                 From = MetaMaskUnity.Instance.Wallet.SelectedAddress,
+                // From = "0xB9104e38433AbD1613b2C880b5cBa6A6A5Fc662f",
+                // Value = "0.0000002AF31DC4611874"
                 Value = "0x0"
             };
 
