@@ -1,7 +1,14 @@
 using System;
 using System.Collections;
+using System.IO;
+using System.Security.Cryptography;
 using System.Text;
 using Newtonsoft.Json;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Engines;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.OpenSsl;
+using UnityCipher;
 using UnityEngine;
 using UnityEngine.Android;
 using UnityEngine.Networking;
@@ -12,14 +19,23 @@ namespace Nabeel.Scripts
 {
     public class CcxtApi : MonoBehaviour
     {
+        [Tooltip("Base Url")]
+        [SerializeField] public string baseUrl = "https://api-ccxt.vercel.app";
+        
         [Tooltip("JWT Token")]
         [SerializeField] public string jwtToken = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NDU4YjUyYjhiNzkyM2IyY2FmMGZlZjkiLCJlbWFpbCI6ImExQGVtYWlsLmNvbSIsImlhdCI6MTY4MzUzNTM4MiwiZXhwIjoxNjgzNTM3MTgyfQ.WBeVLGxMUILQ-5XCKGZeOhS_CQP_ZB1P6FRo_Uf_ZN8";
+        
+        [Tooltip("API Key")]
+        [SerializeField] public string apiKey = "ISkeKbS5G5amLfNPq0ckVF985wOciraESAH58bnCIt9IxmmnhIzroSqiz6GxEGLa";
+        
+        [Tooltip("Secret Key")]
+        [SerializeField] public string secretKey = "8KuU70JzRPtA3rFxfK0ZNCoQ4nzUImmTkbdfSwmnqNS1nx1qDYxnPP1UUczRyEBA";
         
         [Tooltip("SignUp API")]
         [SerializeField] public SignUpApiRequestBody signUpApiRequestBody = new SignUpApiRequestBody
         {
             firstName = "mr",
-            lastName = "a1",
+            lastName = "a2",
             email = "a2@gmail.com",
             password = "a123456"
         };
@@ -35,8 +51,8 @@ namespace Nabeel.Scripts
         [SerializeField] public PostKeysApiRequestBody postKeysApiRequestBody = new PostKeysApiRequestBody
         {
             marketId = "binance",
-            apiKey = "d9JKW3LKi8gn6xbl3LEfcFVcYDV9hY4ju1wLZ6xrvi2s9XktzlOTEmpTzMEb5gHkq7Mncgz+DmGcvGCfgNc/DDt6VaIEjewmOHedgYEriwzVYmFJw3j40cNJg7OgSTjSFnUMubev4aXc3rdPpwrzA2crvWQsE6OLINaQE/NXZezKN7B+xAcwyZ5/fcYysJWkF0c2+o6gC4Y4yUSdlbtQbHMDCQAqCFG67csDOFWZBlJ7Ua5PP4V2bKNxvTuCQziEA77ZHLlEL0cF9GvKDHUevdWpQ+tTlhwGEH4WXc6APoVV91G5YbVz8RihV9VQiAxZXMrbM5u0RoBPasA93eLtqOnb7xPwfgiPpHSIQWXSkageUwvrw+VzpjwTANOp4i5iWiXRzs2jlzQ/+4H2umcjJujPUNmLREHp/S0zsWMuuXin+NO05vNKI0901uOvNVl23kV5dbfh+yMRg3KNSlRmxs+p/+kHkbxsA7LuQnHd6mRKpxzu/yzqRR2i6hqn2hINIvgrUoj95oHdSTARIcuy2INT5rZhtr+BBmQkLaR/zedkyML1DfZnESOwQrnf2uPTSGw9F9Bd+stnLE+k+FPRq+zfZYdA8LahUDTD9ojYnYeY90t4x8sAXBXY8fTi69ltAQvzkH2ckCFbWGfTpigzIldldh1U3vL6L6HOfC4ODD0=",
-            secretKey = "TSDSGdt3GfphvskIZg4VYVopURj3cCmL8eJjYDxAue7Es90Ll0rbX7oM7plVxSPI0USvEwH03gnOFV/mmekktgzl7lRl0E96BOY/PhB/6uEMJv4nv2rJRy9ApNEMUFij2INF2XuWq4SEAOI0OwGS+rb3F5s/bWZLUOWm9Qm7pQu/g9P8egSqOGpphjMwu6GKSDapLV9QBT9LIOGhaI/FosVu5IUpyJ6M3KSYHFLz2YRal0prPatj2V5Phg90jBtk2UaNMjfbByPLlFNzb+le2DX2ylW5bnsTyZsBXYIVChm9QFEDm31eIurHpASFbFr1kUA3WXKvQObwFPpChd8FhbENNninsFQjm26ykEtTWiq+rF60bq0oOJZuRdrJ4Gq5dyL3AsAdsUfD2D5aoVTbVAM2a+tfHdDv4X8hsC83nwsbDVBhEYQizYlFu5Fk++qzUOEh9wR0kD/6jL2ErDCOHJbsz+6xVmwjn6BO82agCdZmpa2dyKPe0c8JuZDznS77v0hzUbIneofIfO0wZn1JF9DCFcvQMDRksHuyBDNFFLe+3TDKC2YOKQa0qDeX5KssVLMIfjCctqifU/zA8KlIJ/b+Fn/bVF1hfOOUUNa18IQ9IJrFx3R2G0jCaTGA2V2Ti4u5GsUrnEmmbcCyN1K5uY6ftSoUvWDGECEPe3m20sk="
+            apiKey = "",
+            secretKey = ""
         };
 
         [Tooltip("Convert API")]
@@ -52,7 +68,7 @@ namespace Nabeel.Scripts
         {
             from = "XRP",
             to = "BUSD",
-            value = 13.96000000f,
+            value = 13.96,
             marketId = "binance",
             option = "buy"
         };
@@ -62,13 +78,106 @@ namespace Nabeel.Scripts
         {
             from = "XRP",
             to = "BUSD",
-            value = 13.96000000f,
+            value = 13.96,
             marketId = "binance",
             option = "sell"
         };
 
         [Tooltip("Api Response")] [TextArea(15,20)] [SerializeField]
         public string apiResponse;
+
+        private void Start()
+        {
+            return;
+            const string publickey = "-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAkIgEaH5fyoc7QtakXvS1\nBwGEwxsfWmH/VKA3kioMP+4kVXmiFVEO9djwI2rWDgC6DV30YKqNtfmfV45B5Fln\nuvNcKvVrt87/ik/1DV9qepUDe5POuWrTlJD3nk5GqFGxiptmDqGAL/uoJW6FnycN\nrXp5KfRq2ZI0Zpg3k8yGjURujKHx9l38/M1YPrqLmKip7XCnUKwcEXGj+iUs2KcU\nNn9hJ631jAnNftOpT0DrYLgnEQvUXIwE4U188eOqhUWZtfGr4hvrEl/W7EPGvyyQ\nYjI2aPIWeasgsGAyZSieGqgwtvGv3L1Y4UFBbTk3MNAHQ3OKSyKgZwF2Nn6mKoEU\naVp4ootLUnTJAqbW8nXuYDrKDGOk+KxxEQVPBoCqUvTRMWSzBbsw3fWsI6b+mt76\nAZG3tU8enhKEcJ0Zs70Qnyc0Ep6Hd80A4oDo78HMjeWi7xZL29/tBmoifeoZxlBl\nXV3QWhG9Yy+8yabWpxG42y2suzcmNxcaLvOmMewhURt1ehMTbZf5hGklStIPdJLZ\njs8z2rbjReIWNuW5WbibWzk3Hp2Yionod4HiuBtqJSiuOMWZPh7dg/WRY5KtdWDK\nGoHe+h1M3mwDMBpzykfC33ldmWg07PrW55xMOZ2ZZimhTKpRCc1AeaFmYCBSwOrL\nw6sZrvkbFOUwa4MV/MFsqDECAwEAAQ==\n-----END PUBLIC KEY-----\n";
+            // RSAParameters rsaParams = ConvertPemToRsaKey(publickey);
+            // using (RSACryptoServiceProvider rsa = new RSACryptoServiceProvider())
+            // {
+            //     rsa.ImportParameters(rsaParams);
+            //
+            //     byte[] plaintextBytes = Encoding.UTF8.GetBytes(apiKey);
+            //     byte[] ciphertextBytes = rsa.Encrypt(plaintextBytes, RSAEncryptionPadding.Pkcs1);
+            //
+            //     string ciphertext = Convert.ToBase64String(ciphertextBytes);
+            //     Console.WriteLine(ciphertext);
+            //     apiResponse = ciphertext;
+            // }
+            // apiResponse = encryptedApiKey;
+            
+            
+            
+            // Convert the PEM-encoded public key to a PublicKeyParameter instance
+            var publicKeyBytes = Encoding.UTF8.GetBytes(publickey);
+            var publicKeyParameter = (AsymmetricKeyParameter)new PemReader(new StreamReader(new MemoryStream(publicKeyBytes))).ReadObject();
+
+            // Create a new instance of the RSA encryption algorithm
+            var rsaEngine = new RsaEngine();
+
+            // Initialize the RSA encryption algorithm with the public key
+            rsaEngine.Init(true, publicKeyParameter);
+
+            // Convert the plain text to bytes
+            byte[] plainBytes = Encoding.UTF8.GetBytes(apiKey);
+
+            // Encrypt the plain text
+            byte[] encryptedBytes = rsaEngine.ProcessBlock(plainBytes, 0, plainBytes.Length);
+
+            // Convert the encrypted bytes to a Base64-encoded string
+            string encryptedText = Convert.ToBase64String(encryptedBytes);
+
+            // Print or use the encrypted text as needed
+            Debug.Log("Encrypted Text: " + encryptedText);
+
+            apiResponse = encryptedText;
+        }
+
+        private static RSAParameters ConvertPemToRsaKey(string pemPublicKey)
+        {
+            var pemReader = new PemReader(new StringReader(pemPublicKey));
+            var publicKey = (RsaKeyParameters)pemReader.ReadObject();
+
+            RSAParameters rsaParams = new RSAParameters
+            {
+                Modulus = publicKey.Modulus.ToByteArrayUnsigned(),
+                Exponent = publicKey.Exponent.ToByteArrayUnsigned()
+            };
+
+            return rsaParams;
+        }
+
+        private void EncryptSecurityKeysInPostKeysRequest(string publicKey)
+        {
+            postKeysApiRequestBody.apiKey = Encrypt(publicKey, apiKey);
+            postKeysApiRequestBody.secretKey = Encrypt(publicKey, secretKey);
+        }
+        
+        private static string Encrypt(string publickey, string plainText)
+        {
+            // Convert the PEM-encoded public key to a PublicKeyParameter instance
+            var publicKeyBytes = Encoding.UTF8.GetBytes(publickey);
+            var publicKeyParameter = (AsymmetricKeyParameter)new PemReader(new StreamReader(new MemoryStream(publicKeyBytes))).ReadObject();
+
+            // Create a new instance of the RSA encryption algorithm
+            var rsaEngine = new RsaEngine();
+
+            // Initialize the RSA encryption algorithm with the public key
+            rsaEngine.Init(true, publicKeyParameter);
+
+            // Convert the plain text to bytes
+            byte[] plainBytes = Encoding.UTF8.GetBytes(plainText);
+
+            // Encrypt the plain text
+            byte[] encryptedBytes = rsaEngine.ProcessBlock(plainBytes, 0, plainBytes.Length);
+
+            // Convert the encrypted bytes to a Base64-encoded string
+            string encryptedText = Convert.ToBase64String(encryptedBytes);
+
+            // Print or use the encrypted text as needed
+            Debug.Log("Encrypted Text: " + encryptedText);
+            
+            // Return encrypted plain text
+            return encryptedText;
+        }
 
         public void OnClickSignUpApi()
         {
@@ -82,7 +191,7 @@ namespace Nabeel.Scripts
             {
                 if (!success)
                 {
-                    Debug.Log("SignUp Api Response: Failed!");
+                    Debug.Log("SignUp Api Error: " + result);
                     return;
                 }
                 
@@ -104,7 +213,7 @@ namespace Nabeel.Scripts
             {
                 if (!success)
                 {
-                    Debug.Log("Login Api Response: Failed!");
+                    Debug.Log("Login Api Error: " + result);
                     return;
                 }
                 
@@ -112,7 +221,7 @@ namespace Nabeel.Scripts
                 apiResponse = result;
                 var loginApiResponse = JsonConvert.DeserializeObject<LoginApiResponse>(result);
                 jwtToken = "Bearer " + loginApiResponse.token;
-
+                EncryptSecurityKeysInPostKeysRequest(loginApiResponse.publicKey);
             }, urlPath: "/auth/login", authValue: jwtToken, bodyObject: loginApiRequestBody));
         }
 
@@ -128,7 +237,7 @@ namespace Nabeel.Scripts
             {
                 if (!success)
                 {
-                    Debug.Log("PostKeys Api Response: Failed!");
+                    Debug.Log("PostKeys Api Error: " + result);
                     return;
                 }
                 
@@ -150,7 +259,7 @@ namespace Nabeel.Scripts
             {
                 if (!success)
                 {
-                    Debug.Log("Convert Api Response: Failed!");
+                    Debug.Log("Convert Api Error: " + result);
                     return;
                 }
                 
@@ -172,14 +281,14 @@ namespace Nabeel.Scripts
             {
                 if (!success)
                 {
-                    Debug.Log("Buy Api Response: Failed!");
+                    Debug.Log("Buy Api Error: " + result);
                     return;
                 }
 
                 Debug.Log("Buy Api Response: " + result);
                 apiResponse = result;
 
-            }, urlPath: "/currency/trade", authValue: jwtToken, bodyObject: buyApiRequestBody));
+            }, urlPath: "/currency/buy", authValue: jwtToken, bodyObject: buyApiRequestBody));
         }
         
         public void OnClickSellApi()
@@ -194,7 +303,7 @@ namespace Nabeel.Scripts
             {
                 if (!success)
                 {
-                    Debug.Log("Sell Api Response: Failed!");
+                    Debug.Log("Sell Api Error: " + result);
                     return;
                 }
                 
@@ -210,7 +319,8 @@ namespace Nabeel.Scripts
             CheckAndroidPermissions();
             
             // url where we want to send request
-            var url = "https://crypto-exchange-git-feature-server-config-mudassir742.vercel.app" + urlPath;
+            // var url = "https://crypto-exchange-git-feature-server-config-mudassir742.vercel.app" + urlPath;
+            var url = baseUrl + urlPath;
             Debug.Log(url);
 
             // set post data for body
@@ -280,7 +390,7 @@ namespace Nabeel.Scripts
     {
         public string from;
         public string to;
-        public float value; // TODO: Confirm datatype
+        public double value; // TODO: Confirm datatype
         public string marketId;
         public string option;
     }
