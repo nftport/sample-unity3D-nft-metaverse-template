@@ -390,7 +390,7 @@ namespace Nabeel.Scripts
     {
         public string from;
         public string to;
-        public double value; // TODO: Confirm datatype
+        public double value; // TODO: Confirm datatype, Maybe this is making 400 Bad Request
         public string marketId;
         public string option;
     }
