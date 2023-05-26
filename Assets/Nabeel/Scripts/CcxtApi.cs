@@ -325,6 +325,7 @@ namespace Nabeel.Scripts
 
             // set post data for body
             var body = JsonUtility.ToJson(bodyObject);
+            Debug.Log("BodyToJson: " + body);
 
             // sending request
             using var request = new UnityWebRequest(url, "POST");
